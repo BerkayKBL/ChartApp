@@ -34,6 +34,7 @@ import com.berkaykbl.chartapp.ui.theme.ChartAppTheme
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberCandlestickCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
@@ -42,7 +43,9 @@ import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.core.cartesian.data.candlestickSeries
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
+import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.core.cartesian.marker.CartesianMarker
 import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
 import com.patrykandpatrick.vico.core.common.component.TextComponent
@@ -103,14 +106,14 @@ fun HomeScreen() {
     }
     chartVariables = newList.toList()
 
-    var pagerState = rememberPagerState(pageCount = { 2 })
+    var pagerState = rememberPagerState(pageCount = { 4 })
 
     HorizontalPager(
         pagerState,
         modifier = Modifier.fillMaxSize()
     ) {
         var newOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        if (it == 0) {
+        if (it == 3) {
             VariablesPage(chartVariables) { action, entity ->
                 if (action == "add") {
                     val newArray = ArrayList<VariableEntity>()
@@ -124,10 +127,18 @@ fun HomeScreen() {
 
                 }
             }
+        } else if (it == 2) {
+
+            newOrientation= ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            LinearChart(chartVariables)
         } else if (it == 1) {
 
             newOrientation= ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             ColumnChart(chartVariables)
+        } else if (it == 0) {
+
+            newOrientation= ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            LinearChartMountain(chartVariables)
         }
         if (pagerState.currentPageOffsetFraction == 0f) {
             activity.requestedOrientation = newOrientation
@@ -208,6 +219,39 @@ fun ColumnChart(
         Column(modifier = Modifier.padding(inner)) {
             CartesianChartHost(
                 rememberCartesianChart(
+                    rememberColumnCartesianLayer(),
+                    startAxis = VerticalAxis.rememberStart(
+                    ),
+                    bottomAxis = HorizontalAxis.rememberBottom(
+                        valueFormatter = CartesianValueFormatter { context, value, verticalAxisPosition ->
+                            dateFormat.format(chartVariables[value.toInt()].date)
+                        }
+                    ),
+                ),
+                modelProducer,
+                modifier = Modifier.fillMaxSize()
+            )
+
+        }
+    }
+}
+
+@Composable
+fun LinearChart(
+    chartVariables: List<VariableEntity>
+) {
+    val modelProducer = remember { CartesianChartModelProducer() }
+    LaunchedEffect(Unit) {
+        modelProducer.runTransaction {
+            lineSeries { series(chartVariables.map {
+                it.variable }.toList()) }
+        }
+    }
+
+    Scaffold { inner ->
+        Column(modifier = Modifier.padding(inner)) {
+            CartesianChartHost(
+                rememberCartesianChart(
                     rememberLineCartesianLayer(),
                     startAxis = VerticalAxis.rememberStart(
                     ),
@@ -218,6 +262,40 @@ fun ColumnChart(
                     ),
                 ),
                 modelProducer,
+                modifier = Modifier.fillMaxSize()
+            )
+
+        }
+    }
+}
+@Composable
+fun LinearChartMountain(
+    chartVariables: List<VariableEntity>
+) {
+    val modelProducer = remember { CartesianChartModelProducer() }
+    LaunchedEffect(Unit) {
+        modelProducer.runTransaction {
+            lineSeries { series(chartVariables.map {
+                it.variable }.toList()) }
+        }
+
+    }
+
+    Scaffold { inner ->
+        Column(modifier = Modifier.padding(inner)) {
+            CartesianChartHost(
+                rememberCartesianChart(
+                    rememberLineCartesianLayer(),
+                    startAxis = VerticalAxis.rememberStart(
+                    ),
+                    bottomAxis = HorizontalAxis.rememberBottom(
+                        valueFormatter = CartesianValueFormatter { context, value, verticalAxisPosition ->
+                            dateFormat.format(chartVariables[value.toInt()].date)
+                        }
+                    ),
+                ),
+                modelProducer,
+                modifier = Modifier.fillMaxSize()
             )
 
         }
