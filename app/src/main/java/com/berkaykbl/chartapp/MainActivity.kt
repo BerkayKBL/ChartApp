@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.berkaykbl.chartapp.ui.theme.ChartAppTheme
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
@@ -42,10 +44,12 @@ import com.patrykandpatrick.vico.core.cartesian.CartesianDrawingContext
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.data.candlestickSeries
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.core.cartesian.marker.CartesianMarker
 import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
 import com.patrykandpatrick.vico.core.common.component.TextComponent
@@ -70,7 +74,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-val defaultChartVariableCount = 10
+val defaultChartVariableCount = 5
 val endDate = 1751210803000
 val everyDay = 86400000
 val maxDouble = 108.8
@@ -112,8 +116,9 @@ fun HomeScreen() {
         pagerState,
         modifier = Modifier.fillMaxSize()
     ) {
-        var newOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        if (it == 3) {
+        var newOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        if (it == 4) {
+            newOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             VariablesPage(chartVariables) { action, entity ->
                 if (action == "add") {
                     val newArray = ArrayList<VariableEntity>()
@@ -129,16 +134,14 @@ fun HomeScreen() {
             }
         } else if (it == 2) {
 
-            newOrientation= ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             LinearChart(chartVariables)
-        } else if (it == 1) {
+        } else if (it == 3) {
 
-            newOrientation= ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             ColumnChart(chartVariables)
-        } else if (it == 0) {
-
-            newOrientation= ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        } else if (it == 1) {
             LinearChartMountain(chartVariables)
+        } else if (it == 0) {
+            ColumnPartsChart(chartVariables)
         }
         if (pagerState.currentPageOffsetFraction == 0f) {
             activity.requestedOrientation = newOrientation
@@ -204,100 +207,5 @@ fun VariablesPage(
     }
 }
 
-@Composable
-fun ColumnChart(
-    chartVariables: List<VariableEntity>
-) {
-    val modelProducer = remember { CartesianChartModelProducer() }
-    LaunchedEffect(Unit) {
-        modelProducer.runTransaction {
-            columnSeries { series(chartVariables.map { it.variable }.toList()) }
-        }
-    }
 
-    Scaffold { inner ->
-        Column(modifier = Modifier.padding(inner)) {
-            CartesianChartHost(
-                rememberCartesianChart(
-                    rememberColumnCartesianLayer(),
-                    startAxis = VerticalAxis.rememberStart(
-                    ),
-                    bottomAxis = HorizontalAxis.rememberBottom(
-                        valueFormatter = CartesianValueFormatter { context, value, verticalAxisPosition ->
-                            dateFormat.format(chartVariables[value.toInt()].date)
-                        }
-                    ),
-                ),
-                modelProducer,
-                modifier = Modifier.fillMaxSize()
-            )
 
-        }
-    }
-}
-
-@Composable
-fun LinearChart(
-    chartVariables: List<VariableEntity>
-) {
-    val modelProducer = remember { CartesianChartModelProducer() }
-    LaunchedEffect(Unit) {
-        modelProducer.runTransaction {
-            lineSeries { series(chartVariables.map {
-                it.variable }.toList()) }
-        }
-    }
-
-    Scaffold { inner ->
-        Column(modifier = Modifier.padding(inner)) {
-            CartesianChartHost(
-                rememberCartesianChart(
-                    rememberLineCartesianLayer(),
-                    startAxis = VerticalAxis.rememberStart(
-                    ),
-                    bottomAxis = HorizontalAxis.rememberBottom(
-                        valueFormatter = CartesianValueFormatter { context, value, verticalAxisPosition ->
-                            dateFormat.format(chartVariables[value.toInt()].date)
-                        }
-                    ),
-                ),
-                modelProducer,
-                modifier = Modifier.fillMaxSize()
-            )
-
-        }
-    }
-}
-@Composable
-fun LinearChartMountain(
-    chartVariables: List<VariableEntity>
-) {
-    val modelProducer = remember { CartesianChartModelProducer() }
-    LaunchedEffect(Unit) {
-        modelProducer.runTransaction {
-            lineSeries { series(chartVariables.map {
-                it.variable }.toList()) }
-        }
-
-    }
-
-    Scaffold { inner ->
-        Column(modifier = Modifier.padding(inner)) {
-            CartesianChartHost(
-                rememberCartesianChart(
-                    rememberLineCartesianLayer(),
-                    startAxis = VerticalAxis.rememberStart(
-                    ),
-                    bottomAxis = HorizontalAxis.rememberBottom(
-                        valueFormatter = CartesianValueFormatter { context, value, verticalAxisPosition ->
-                            dateFormat.format(chartVariables[value.toInt()].date)
-                        }
-                    ),
-                ),
-                modelProducer,
-                modifier = Modifier.fillMaxSize()
-            )
-
-        }
-    }
-}
