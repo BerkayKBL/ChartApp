@@ -16,7 +16,9 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerModel
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.core.cartesian.data.ColumnCartesianLayerModel
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
@@ -33,12 +35,34 @@ fun ColumnPartsChart(
     )
     LaunchedEffect(Unit) {
         modelProducer.runTransaction {
-            columnSeries { series(chartVariables.map { it.variable }.toList()) }
+            columnSeries {
+                series(1, 2, 3, 4)
+
+            }
         }
     }
 
     val mergeMode: (ExtraStore) -> ColumnCartesianLayer.MergeMode = {
-        ColumnCartesianLayer.MergeMode.Stacked
+        val r = ColumnCartesianLayer.MergeMode.Stacked
+        r.getMaxY(
+            ColumnCartesianLayerModel(
+                listOf(
+                    listOf(
+                        ColumnCartesianLayerModel.Entry(1, 5),
+                        ColumnCartesianLayerModel.Entry(1, 10),
+                    ),
+                )
+            )
+        )
+        r.getMinY(ColumnCartesianLayerModel(
+            listOf(
+                listOf(
+                    ColumnCartesianLayerModel.Entry(1, 5),
+                    ColumnCartesianLayerModel.Entry(1, 10),
+                ),
+            )
+        ))
+        r
     }
 
     Scaffold { inner ->
