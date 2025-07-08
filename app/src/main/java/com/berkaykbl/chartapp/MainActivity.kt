@@ -77,7 +77,7 @@ class MainActivity : ComponentActivity() {
 val defaultChartVariableCount = 5
 val endDate = 1751210803000
 val everyDay = 86400000
-val maxDouble = 108.8
+val maxDouble = 100.0
 
 val dateFormat = SimpleDateFormat("dd MMM yyyy")
 

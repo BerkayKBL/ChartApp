@@ -1,5 +1,6 @@
 package com.berkaykbl.chartapp
 
+import android.graphics.Path
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -8,69 +9,99 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
+import com.patrykandpatrick.vico.core.cartesian.axis.Axis
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerModel
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
-import com.patrykandpatrick.vico.core.cartesian.data.ColumnCartesianLayerModel
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
+import com.patrykandpatrick.vico.core.common.Fill
+import com.patrykandpatrick.vico.core.common.MeasuringContext
+import com.patrykandpatrick.vico.core.common.component.LineComponent
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
+import com.patrykandpatrick.vico.core.common.shape.CorneredShape
+import com.patrykandpatrick.vico.core.common.shape.Shape
+import kotlin.random.Random
 
 @Composable
 fun ColumnPartsChart(
     chartVariables: List<VariableEntity>
 ) {
     val modelProducer = remember { CartesianChartModelProducer() }
-    val stackedData = listOf(
-        listOf(30f, 70f),
-        listOf(40f, 20f),
-        listOf(50f, 50f)
-    )
+    val top = listOf(150, 20, 80)
+    val bottom = listOf(10, 150, 20)
+    val topValues = ArrayList<Double>()
+    val bottomValues = ArrayList<Double>()
+    chartVariables.forEach {
+        val variable = it.variable
+        val topAverage = Random.nextDouble(0.0, 1.0)
+        val bottomAverage = 1 - topAverage
+        topValues.add(variable * topAverage)
+        bottomValues.add(bottomAverage * variable)
+
+    }
     LaunchedEffect(Unit) {
         modelProducer.runTransaction {
             columnSeries {
-                series(1, 2, 3, 4)
-
+                series(topValues)
+                series(bottomValues)
             }
         }
     }
 
     val mergeMode: (ExtraStore) -> ColumnCartesianLayer.MergeMode = {
-        val r = ColumnCartesianLayer.MergeMode.Stacked
-        r.getMaxY(
-            ColumnCartesianLayerModel(
-                listOf(
-                    listOf(
-                        ColumnCartesianLayerModel.Entry(1, 5),
-                        ColumnCartesianLayerModel.Entry(1, 10),
-                    ),
-                )
-            )
-        )
-        r.getMinY(ColumnCartesianLayerModel(
-            listOf(
-                listOf(
-                    ColumnCartesianLayerModel.Entry(1, 5),
-                    ColumnCartesianLayerModel.Entry(1, 10),
-                ),
-            )
-        ))
-        r
+        ColumnCartesianLayer.MergeMode.Stacked
     }
+
+    val spec = LineComponent(
+        fill = Fill(android.graphics.Color.RED)
+    )
+
+    val com = rememberLineComponent(
+        fill = Fill(android.graphics.Color.RED),
+        shape = CorneredShape(
+            bottomRight = CorneredShape.Corner.Rounded,
+            bottomLeft = CorneredShape.Corner.Rounded,
+            topLeft = CorneredShape.Corner.Rounded,
+            topRight = CorneredShape.Corner.Rounded
+        )
+    )
 
     Scaffold { inner ->
         Column(modifier = Modifier.padding(inner)) {
             CartesianChartHost(
                 rememberCartesianChart(
                     rememberColumnCartesianLayer(
-                        mergeMode = mergeMode
+                        columnProvider = ColumnCartesianLayer.ColumnProvider.series(
+                            com.copy(
+                                shape = CorneredShape(
+                                    topLeft = CorneredShape.Corner.Rounded,
+                                    topRight = CorneredShape.Corner.Rounded,
+                                    bottomRight = CorneredShape.Corner.Rounded,
+                                    bottomLeft = CorneredShape.Corner.Rounded,
+                                )
+                            ),
+                            com.copy(
+                                shape = CorneredShape(
+                                    topLeft = CorneredShape.Corner.Rounded,
+                                    topRight = CorneredShape.Corner.Rounded,
+                                    bottomRight = CorneredShape.Corner.Sharp,
+                                    bottomLeft = CorneredShape.Corner.Sharp,
+                                )
+                            ),
+                            com
+                        ),
+                        columnCollectionSpacing = 10.dp,
+                        mergeMode = mergeMode,
+
                     ),
                     startAxis = VerticalAxis.rememberStart(),
                     bottomAxis = HorizontalAxis.rememberBottom(
