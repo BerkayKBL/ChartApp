@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
@@ -70,8 +71,8 @@ fun ColumnPartsChart(
         shape = CorneredShape(
             bottomRight = CorneredShape.Corner.Rounded,
             bottomLeft = CorneredShape.Corner.Rounded,
-            topLeft = CorneredShape.Corner.Rounded,
-            topRight = CorneredShape.Corner.Rounded
+            topLeft = CorneredShape.Corner.Sharp,
+            topRight = CorneredShape.Corner.Sharp
         )
     )
 
@@ -81,23 +82,16 @@ fun ColumnPartsChart(
                 rememberCartesianChart(
                     rememberColumnCartesianLayer(
                         columnProvider = ColumnCartesianLayer.ColumnProvider.series(
-                            com.copy(
-                                shape = CorneredShape(
-                                    topLeft = CorneredShape.Corner.Rounded,
-                                    topRight = CorneredShape.Corner.Rounded,
-                                    bottomRight = CorneredShape.Corner.Rounded,
-                                    bottomLeft = CorneredShape.Corner.Rounded,
-                                )
-                            ),
+                            com,
                             com.copy(
                                 shape = CorneredShape(
                                     topLeft = CorneredShape.Corner.Rounded,
                                     topRight = CorneredShape.Corner.Rounded,
                                     bottomRight = CorneredShape.Corner.Sharp,
                                     bottomLeft = CorneredShape.Corner.Sharp,
-                                )
-                            ),
-                            com
+                                ),
+                                fill = Fill(android.graphics.Color.BLUE)
+                            )
                         ),
                         columnCollectionSpacing = 10.dp,
                         mergeMode = mergeMode,

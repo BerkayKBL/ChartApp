@@ -133,14 +133,12 @@ fun HomeScreen() {
                 }
             }
         } else if (it == 2) {
-
             LinearChart(chartVariables)
         } else if (it == 3) {
-
             ColumnChart(chartVariables)
-        } else if (it == 1) {
-            LinearChartMountain(chartVariables)
         } else if (it == 0) {
+            LinearChartMountain(chartVariables)
+        } else if (it == 1) {
             ColumnPartsChart(chartVariables)
         }
         if (pagerState.currentPageOffsetFraction == 0f) {
