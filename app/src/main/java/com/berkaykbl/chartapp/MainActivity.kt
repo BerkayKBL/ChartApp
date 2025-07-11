@@ -74,7 +74,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-val defaultChartVariableCount = 5
+val defaultChartVariableCount = 20
 val endDate = 1751210803000
 val everyDay = 86400000
 val maxDouble = 100.0
@@ -86,7 +86,7 @@ val dateFormat = SimpleDateFormat("dd MMM yyyy")
 fun HomeScreen() {
     val context = LocalContext.current
 
-    (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 
     val activity = (context as Activity)
     var chartVariables by remember {
@@ -110,100 +110,18 @@ fun HomeScreen() {
     }
     chartVariables = newList.toList()
 
-    var pagerState = rememberPagerState(pageCount = { 4 })
+    var pagerState = rememberPagerState(pageCount = { 3 })
 
     HorizontalPager(
         pagerState,
         modifier = Modifier.fillMaxSize()
     ) {
-        var newOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        if (it == 4) {
-            newOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-            VariablesPage(chartVariables) { action, entity ->
-                if (action == "add") {
-                    val newArray = ArrayList<VariableEntity>()
-                    newArray.add(entity)
-                    newArray.addAll(chartVariables)
-                    chartVariables = newArray.toList()
-                } else if (action == "delete") {
-                    val newArray = ArrayList<VariableEntity>()
-                    newArray.addAll(chartVariables)
-                    chartVariables = newArray.filter { it.id != entity.id }.toList()
-
-                }
-            }
-        } else if (it == 2) {
-            LinearChart(chartVariables)
-        } else if (it == 3) {
+        if (it == 2) {
             ColumnChart(chartVariables)
         } else if (it == 0) {
             LinearChartMountain(chartVariables)
         } else if (it == 1) {
             ColumnPartsChart(chartVariables)
         }
-        if (pagerState.currentPageOffsetFraction == 0f) {
-            activity.requestedOrientation = newOrientation
-        }
     }
 }
-
-@Composable
-fun VariablesPage(
-    chartVariables: List<VariableEntity>,
-    action: (String, VariableEntity) -> Unit
-) {
-    var inputDate by remember { mutableStateOf("12102000") }
-    var inputValue by remember { mutableStateOf("12.0") }
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Row {
-            Icon(Icons.Default.Add, null, modifier = Modifier.clickable {
-                action(
-                    "add", VariableEntity(
-                        UUID.randomUUID().toString(),
-                        convertToTimestamp(inputDate),
-                        inputValue.toDouble()
-                    )
-                )
-            })
-            TextFieldComponent(Modifier.weight(1f), "Tarih", inputDate, inputType = "date") {
-                inputDate = it
-            }
-
-            TextFieldComponent(Modifier.weight(1f), "Değer", inputValue, inputType = "double") {
-                inputValue = it
-            }
-        }
-        LazyColumn {
-            items(chartVariables.size, key = {
-                val variable = chartVariables[it]
-                variable.id
-            }) { i ->
-                val variable = chartVariables[i]
-                Row {
-                    Icon(Icons.Default.Delete, null, modifier = Modifier.clickable {
-                        action("delete", variable)
-                    })
-                    TextFieldComponent(
-                        Modifier.weight(1f),
-                        "Tarih",
-                        dateFormat.format(variable.date),
-                        readOnly = true
-                    ) {}
-
-                    TextFieldComponent(
-                        Modifier.weight(1f),
-                        "Değer",
-                        variable.variable.toString(),
-                        readOnly = true
-                    ) {
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-

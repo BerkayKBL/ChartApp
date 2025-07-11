@@ -13,11 +13,15 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
+import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
+import com.patrykandpatrick.vico.core.common.Fill
+import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 
 
 @Composable
@@ -35,7 +39,19 @@ fun ColumnChart(
         Column(modifier = Modifier.padding(inner)) {
             CartesianChartHost(
                 rememberCartesianChart(
-                    rememberColumnCartesianLayer(),
+                    rememberColumnCartesianLayer(
+                        columnProvider = ColumnCartesianLayer.ColumnProvider.series(
+                            rememberLineComponent(
+                                fill = Fill(android.graphics.Color.RED),
+                                shape = CorneredShape(
+                                    bottomRight = CorneredShape.Corner.Rounded,
+                                    bottomLeft = CorneredShape.Corner.Rounded,
+                                    topLeft = CorneredShape.Corner.Rounded,
+                                    topRight = CorneredShape.Corner.Rounded
+                                )
+                            )
+                        )
+                    ),
                     startAxis = VerticalAxis.rememberStart(
                     ),
                     bottomAxis = HorizontalAxis.rememberBottom(
